@@ -39,7 +39,7 @@ namespace Library.Business.Implementations
             }
             if(book.availableCount < 1)
             {
-                throw new NotAvailableBookException("This book is now availabe now");
+                throw new NotAvailableBookException("This book is not availabe now");
             }
             BookRental bookRental = new BookRental(bookid,booktitle,borrowdate,returndate);
             _database.bookRentals.Add(bookRental);

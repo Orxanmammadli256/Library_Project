@@ -15,14 +15,18 @@ bool isOperationActive = true;
 while (isOptionActive)
 {
     Console.WriteLine("Choose the option: ");
-    Console.WriteLine("Genre\tAuthor\tBook");
+    Console.WriteLine("Genre (genre)\t\tAuthor (author)\t\tBook (book)\t BookRental (bookrental)\tExit Program (exit)");
     string? entity = Console.ReadLine();
     if(string.IsNullOrEmpty(entity))
     {
         Console.WriteLine("Please choose one option");
         continue;
     }
-    if(entity.ToLower() != "genre" &&  entity.ToLower() != "author" && entity.ToLower() != "book")
+    if(entity.ToLower() == "exit")
+    {
+        break;
+    }
+    if(entity.ToLower() != "genre" &&  entity.ToLower() != "author" && entity.ToLower() != "book" && entity.ToLower() != "exit" && entity.ToLower() != "bookrental")
     {
         Console.WriteLine("Please do not choose out of these options");
         continue;
@@ -37,6 +41,10 @@ while (isOptionActive)
         {
             Console.WriteLine("Please choose one operation");
             continue;
+        }
+        if (operation.ToLower() == "exit")
+        {
+            break;
         }
         if (!ValidateOperation(entity.ToLower(), operation.ToLower()))
         {
@@ -61,10 +69,12 @@ void ProcessOperation(string entity, string operation)
                     CreateGenre(genrename);
                     break;
                 case ("delete"):
-                    ShowAllGenre();
-                    Console.WriteLine("Enter genre id to delete: ");
+                    Console.WriteLine("Enter genre name to search: ");
+                    genrename = Console.ReadLine() ?? string.Empty;
                     try
                     {
+                        ShowAllGenreByName(genrename);
+                        Console.WriteLine("Enter genre id to delete: ");
                         int genreid = int.Parse(Console.ReadLine() ?? string.Empty);
                         DeleteGenre(genreid, bookService);
                     }
@@ -82,7 +92,9 @@ void ProcessOperation(string entity, string operation)
                     ShowAllGenreByName(genrename);
                     break;
                 case ("update"):
-                    ShowAllGenre();
+                    Console.WriteLine("Enter genre name to search: ");
+                    genrename = Console.ReadLine() ?? string.Empty;
+                    ShowAllGenreByName(genrename);
                     Console.WriteLine("Enter genre id to update: ");
                     try
                     {
@@ -109,7 +121,9 @@ void ProcessOperation(string entity, string operation)
                     CreateAuthor(authorname, authorsurname);
                     break;
                 case ("delete"):
-                    ShowAllAuthor();
+                    Console.WriteLine("Enter author name to search: ");
+                    authorname = Console.ReadLine() ?? string.Empty;
+                    ShowAllAuthorByName(authorname);
                     Console.WriteLine("Enter author id to delete: ");
                     try
                     {
@@ -125,17 +139,19 @@ void ProcessOperation(string entity, string operation)
                     ShowAllAuthor();
                     break;
                 case ("showbyname"):
-                    Console.WriteLine("Enter author name: ");
+                    Console.WriteLine("Enter author name to search: ");
                     authorname = Console.ReadLine() ?? string.Empty;
                     ShowAllAuthorByName(authorname);
                     break;
                 case ("showbysurname"):
-                    Console.WriteLine("Enter author surname: ");
+                    Console.WriteLine("Enter author surname to search: ");
                     authorsurname = Console.ReadLine();
                     ShowAllAuthorBySurname(authorsurname);
                     break;
                 case ("update"):
-                    ShowAllAuthor();
+                    Console.WriteLine("Enter author name to search: ");
+                    authorname = Console.ReadLine() ?? string.Empty;
+                    ShowAllAuthorByName(authorname);
                     Console.WriteLine("Enter author id to update: ");
                     try
                     {
@@ -180,8 +196,24 @@ void ProcessOperation(string entity, string operation)
                         Console.WriteLine("Enter publication date (dd.MM.yyyy): ");
                         string date = Console.ReadLine() ?? string.Empty;
                         DateTime publicationdate = DateTime.ParseExact(date, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                        ShowAllGenre();
+                        Console.WriteLine("Enter genre ids with the space between them: ");
+                        HashSet<int> genreidset = new HashSet<int>(Console.ReadLine().Split(" ").Select(int.Parse));
                         List<Genre> genres = new List<Genre>();
+                        foreach (int id in genreidset)
+                        {
+                            var genre = genreService.GetById(id);
+                            genres.Add(genre);
+                        }
+                        ShowAllAuthor();
+                        Console.WriteLine("Enter author ids with the space between them: ");
+                        HashSet<int> authoridset = new HashSet<int>(Console.ReadLine().Split(" ").Select(int.Parse));
                         List<Author> authors = new List<Author>();
+                        foreach (int id in authoridset)
+                        {
+                            var author = authorService.GetById(id);
+                            authors.Add(author);
+                        }
                         CreateBook(title,count,publicationdate,genres,authors);
                     }
                     catch(Exception ex)
@@ -190,8 +222,107 @@ void ProcessOperation(string entity, string operation)
                     }
                     break;
                 case "delete":
+                    Console.WriteLine("Enter title to search: ");
+                    string booktitle = Console.ReadLine() ?? string.Empty;
+                    ShowAllBookByTitle(booktitle);
+                    Console.WriteLine("Enter book id to delete: ");
+                    try
+                    {
+                        Guid bookid = Guid.Parse(Console.ReadLine() ?? string.Empty);
+                        DeleteBook(bookid);
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
                     break;
-
+                case "showall":
+                    ShowAllBook();
+                    break;
+                case "showbytitle":
+                    Console.WriteLine("Enter title to search: ");
+                    title = Console.ReadLine() ?? string.Empty;
+                    ShowAllBookByTitle(title);
+                    break;
+                case "showbygenre":
+                    ShowAllGenre();
+                    Console.WriteLine("Enter genre id to search in the books: ");
+                    try
+                    {
+                        int genreid = int.Parse(Console.ReadLine() ?? string.Empty);
+                        var wantedgenre = genreService.GetById(genreid);
+                        ShowAllBookByGenre(wantedgenre);
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                    break;
+                case "showbyauthor":
+                    ShowAllAuthor();
+                    Console.WriteLine("Enter author id to search in the books: ");
+                    try
+                    {
+                        int authorid = int.Parse(Console.ReadLine() ?? string.Empty);
+                        var wantedauthor = authorService.GetById(authorid);
+                        ShowAllBookByAuthor(wantedauthor);
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                    break;
+                case "showbydate":
+                    Console.WriteLine("Enter publication date (dd.MM.yyyy) to search: ");
+                    try
+                    {
+                        string wanteddate = Console.ReadLine() ?? string.Empty;
+                        DateTime wantedpublicationdate = DateTime.ParseExact(wanteddate, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                        ShowAllBookByPublicationDate(wantedpublicationdate);
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                    break;
+                case "update":
+                    ShowAllBook();
+                    try
+                    {
+                        Console.WriteLine("Enter id to update: ");
+                        Guid bookid = Guid.Parse(Console.ReadLine() ?? string.Empty);
+                        Console.WriteLine("Enter new title: ");
+                        string newtitle = Console.ReadLine() ?? string.Empty;
+                        Console.WriteLine("Enter new count: ");
+                        int newcount = int.Parse(Console.ReadLine() ?? string.Empty);
+                        Console.WriteLine("Enter new publication date (dd.MM.yyyy): ");
+                        string newdate = Console.ReadLine() ?? string.Empty;
+                        DateTime newpublicationdate = DateTime.ParseExact(newdate, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                        ShowAllGenre();
+                        Console.WriteLine("Enter new genre ids with the space between them: ");
+                        HashSet<int> genreidset = new HashSet<int>(Console.ReadLine().Split(" ").Select(int.Parse));
+                        List<Genre> genres = new List<Genre>();
+                        foreach (int id in genreidset)
+                        {
+                            var genre = genreService.GetById(id);
+                            genres.Add(genre);
+                        }
+                        ShowAllAuthor();
+                        Console.WriteLine("Enter new author ids with the space between them: ");
+                        HashSet<int> authoridset = new HashSet<int>(Console.ReadLine().Split(" ").Select(int.Parse));
+                        List<Author> authors = new List<Author>();
+                        foreach (int id in authoridset)
+                        {
+                            var author = authorService.GetById(id);
+                            authors.Add(author);
+                        }
+                        UpdateBook(bookid, newtitle, newcount, newpublicationdate, genres, authors);
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                    break;
             }
             break;
     }
@@ -237,6 +368,7 @@ void ChooseOperation(string entity)
             Console.WriteLine("Delete genre (delete)");
             Console.WriteLine("Show genres (showall)");
             Console.WriteLine("Show genres by name (showbyname)");
+            Console.WriteLine("Exit (exit)");
             break;
         case "author":
             Console.WriteLine("Create author (create)");
@@ -245,6 +377,7 @@ void ChooseOperation(string entity)
             Console.WriteLine("Show authors (showall)");
             Console.WriteLine("Show authors by name (showbyname)");
             Console.WriteLine("Show authors by surname (showbysurname)");
+            Console.WriteLine("Exit (exit)");
             break;
         case "book":
             Console.WriteLine("Create book (create)");
@@ -255,6 +388,7 @@ void ChooseOperation(string entity)
             Console.WriteLine("Show books by publication date (showbydate)");
             Console.WriteLine("Show books by author (showbyauthor)");
             Console.WriteLine("Show books by genre (showbygenre)");
+            Console.WriteLine("Exit (exit)");
             break;
     }
 }
@@ -429,7 +563,7 @@ void DeleteBook(Guid id)
         Console.WriteLine(ex.Message);
     }
 }
-void GetAllBook()
+void ShowAllBook()
 {
     var books = bookService.GetAll();
     Console.WriteLine("Books");
@@ -438,7 +572,7 @@ void GetAllBook()
         Console.WriteLine(book);
     }
 }
-void GetAllBookByTitle(string title)
+void ShowAllBookByTitle(string title)
 {
     try
     {
@@ -454,7 +588,7 @@ void GetAllBookByTitle(string title)
         Console.WriteLine(ex.Message);
     }
 }
-void GetAllBookByPublicationDate(DateTime publicationdate)
+void ShowAllBookByPublicationDate(DateTime publicationdate)
 {
     try
     {
@@ -470,7 +604,7 @@ void GetAllBookByPublicationDate(DateTime publicationdate)
         Console.WriteLine(ex.Message);
     }
 }
-void GetAllBookByAuthor(Author author)
+void ShowAllBookByAuthor(Author author)
 {
     try
     {
@@ -486,7 +620,8 @@ void GetAllBookByAuthor(Author author)
         Console.WriteLine(ex.Message);
     }
 }
-void GetAllBookByGenre(Genre genre)
+
+void ShowAllBookByGenre(Genre genre)
 {
     try
     {
