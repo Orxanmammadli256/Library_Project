@@ -14,9 +14,11 @@ namespace Library.Business.Implementations
     public class AuthorService : IAuthorService
     {
         private Database _database;
-        public AuthorService(Database database)
+        private BookService _bookservice;
+        public AuthorService(Database database, BookService bookservice)
         {
             _database = database;
+            _bookservice = bookservice;
         }
         public void Create(string name, string? surname = null)
         {
@@ -28,14 +30,14 @@ namespace Library.Business.Implementations
             _database.authors.Add(author);
         }
 
-        public void Delete(int id, BookService bookservice)
+        public void Delete(int id)
         {
             var author = _database.authors.Find(a => a.Id == id);
             if (author is null)
             {
                 throw new NotFoundException("This author does not exist");
             }
-            var book = bookservice.SearchByAuthor(author);
+            var book = _bookservice.SearchByAuthor(author);
             if(book.Count > 0)
             {
                 throw new BookExistException("Book by this author exists");

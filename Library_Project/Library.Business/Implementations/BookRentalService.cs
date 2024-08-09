@@ -18,44 +18,20 @@ namespace Library.Business.Implementations
         {
             _database = database;
         }
-        public void Create(Guid bookid, string booktitle, DateTime borrowdate, DateTime returndate)
+        public void Create(Member member, Book book, DateTime borrowdate, DateTime returndate)
         {
-            if (string.IsNullOrEmpty(booktitle))
-            {
-                throw new ArgumentNullException("Title should not be null");
-            }
-            if (borrowdate > DateTime.Now || returndate > DateTime.Now)
-            {
-                throw new FutureDateException("Date should not be in the future");
-            }
-            if(borrowdate > returndate)
-            {
-                throw new InConsistentDateIntervalException("Borrow date should not be greater than return date");
-            }
-            var book = _database.books.Find(b => b.Id == bookid);
-            if (book is null)
-            {
-                throw new NotFoundException("This book does not exist");
-            }
-            if(book.availableCount < 1)
-            {
-                throw new NotAvailableBookException("This book is not availabe now");
-            }
-            BookRental bookRental = new BookRental(bookid,booktitle,borrowdate,returndate);
+            BookRental bookRental = new BookRental(member,book,borrowdate,returndate);
             _database.bookRentals.Add(bookRental);
-            book.availableCount--;
         }
 
-        public void Delete(int id)
+        public void Delete(int memberid, Guid bookid)
         {
-            var bookRental = _database.bookRentals.Find(br => br.Id == id);
+            var bookRental = _database.bookRentals.Find(br => br.Member.Id == memberid && br.Book.Id == bookid);
             if (bookRental is null)
             {
-                throw new NotFoundException("This book rental does not exist");
+                throw new NotFoundException("This rental record does not exist");
             }
             _database.bookRentals.Remove(bookRental);
-            var book = _database.books.Find(b => b.Id == bookRental.bookId);
-            book.availableCount++;
         }
 
         public List<BookRental> ExpiredGetAll()
@@ -69,12 +45,8 @@ namespace Library.Business.Implementations
             return _database.bookRentals;
         }
 
-        public void Update(int id, Guid bookid, string booktitle, DateTime borrowdate, DateTime returndate)
+        public void Update(int id, int memberid, Guid bookid, DateTime borrowdate, DateTime returndate)
         {
-            if (string.IsNullOrEmpty(booktitle))
-            {
-                throw new ArgumentNullException("Title should not be null");
-            }
             if (borrowdate > DateTime.Now || returndate > DateTime.Now)
             {
                 throw new FutureDateException("Date should not be in the future");
@@ -83,35 +55,53 @@ namespace Library.Business.Implementations
             {
                 throw new InConsistentDateIntervalException("Borrow date should not be greater than return date");
             }
-            var newbook = _database.books.Find(b => b.Id == bookid);
-            if (newbook is null)
+            var bookrental = _database.bookRentals.Find(br => br.Id == id);
+            if(bookrental is null)
+            {
+                throw new NotFoundException("This rental record does not exist");
+            }
+            var member = _database.members.Find(m => m.Id == memberid);
+            if(member is null)
+            {
+                throw new NotFoundException("This member does not exist");
+            }
+            var book = _database.books.Find(b => b.Id == bookid);
+            if( book is null)
             {
                 throw new NotFoundException("This book does not exist");
             }
-            var bookRental = _database.bookRentals.Find(br => br.Id == id);
-            if(bookRental is null)
+            if(member.Id != bookrental.Member.Id)
             {
-                throw new NotFoundException("This book rental does not exist");
+                bookrental.Member.bookRented = false;
+                member.bookRented = true;
             }
-            if (newbook.Id != bookRental.bookId)
+            if(book.Id != bookrental.Book.Id)
             {
-                var oldBook = _database.books.Find(b => b.Id == bookRental.bookId);
-                oldBook.availableCount++;
-                newbook.availableCount--;
+                bookrental.Book.availableCount++;
+                book.availableCount--;
             }
-            bookRental.bookId = bookid;
-            bookRental.borrowDate = borrowdate;
-            bookRental.returnDate = returndate;
-            bookRental.bookTitle = booktitle;
+            bookrental.borrowDate = borrowdate;
+            bookrental.returnDate = returndate;
+            bookrental.Member = member;
+            bookrental.Book = book;
         }
         public BookRental GetById(int id)
         {
             var bookRental = _database.bookRentals.Find(br => br.Id == id);
             if (bookRental is null)
             {
-                throw new NotFoundException("This book rental does not exist");
+                throw new NotFoundException("This rental record does not exist");
             }
             return bookRental;
+        }
+        public BookRental GetByMember(Member member)
+        {
+            var bookrental = _database.bookRentals.Find(br => br.Member == member);
+            if(bookrental is null)
+            {
+                throw new ArgumentNullException("This book rental record does not exist");
+            }
+            return bookrental;
         }
     }
 }

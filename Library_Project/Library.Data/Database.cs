@@ -8,12 +8,14 @@ namespace Library.Data
         public List<Author> authors;
         public List<Genre> genres;
         public List<BookRental> bookRentals;
+        public List<Member> members;
         public Database() 
         {
             books = new List<Book>();
             authors = new List<Author>();
             genres = new List<Genre>();
             bookRentals = new List<BookRental>();
+            members = new List<Member>();
         }
     }
 }

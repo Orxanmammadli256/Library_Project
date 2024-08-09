@@ -13,9 +13,11 @@ namespace Library.Business.Implementations
     public class GenreService : IGenreService
     {
         private Database _database;
-        public GenreService(Database database)
+        private BookService _bookservice;
+        public GenreService(Database database, BookService bookservice)
         {
             _database = database;
+            _bookservice = bookservice;
         }
         public void Create(string name)
         {
@@ -23,7 +25,7 @@ namespace Library.Business.Implementations
             {
                 throw new ArgumentNullException("Genre name should not be null");
             }
-            var checkGenre = _database.genres.Find(g => g.Name == name);
+            var checkGenre = _database.genres.Find(g => g.Name.ToLower() == name.ToLower());
             if(checkGenre is not null)
             {
                 throw new AlreadyExistException("This name exists in the genres");
@@ -32,14 +34,14 @@ namespace Library.Business.Implementations
             _database.genres.Add(genre);
         }
 
-        public void Delete(int id, BookService bookservice)
+        public void Delete(int id)
         {
             var genre = _database.genres.Find(g => g.Id == id);
             if(genre is null)
             {
                 throw new NotFoundException("This genre does not exist");
             }
-            var book = bookservice.SearchByGenre(genre);
+            var book = _bookservice.SearchByGenre(genre);
             if (book.Count > 0)
             {
                 throw new BookExistException("Book with this genre exists");

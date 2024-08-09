@@ -9,11 +9,12 @@ namespace Library.Business.Abstractions
 {
     public interface IBookRentalService
     {
-        void Create(Guid bookid, string booktitle, DateTime borrowdate, DateTime returndate);
-        void Delete(int id);
-        void Update(int id, Guid bookid, string booktitle, DateTime borrowdate, DateTime returndate);
+        void Create(Member member, Book book, DateTime borrowdate, DateTime returndate);
+        void Delete(int memberid, Guid bookid);
+        void Update(int id, int memberid, Guid bookid, DateTime borrowdate, DateTime returndate);
         List<BookRental> GetAll();
         List<BookRental> ExpiredGetAll();
         BookRental GetById(int id);
+        BookRental GetByMember(Member member);
     }
 }

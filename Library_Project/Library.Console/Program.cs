@@ -6,40 +6,83 @@ using System.Transactions;
 using System.Xml.Linq;
 
 Database database = new Database();
-AuthorService authorService = new AuthorService(database);
-GenreService genreService = new GenreService(database);
 BookService bookService = new BookService(database);
+AuthorService authorService = new AuthorService(database,bookService);
+GenreService genreService = new GenreService(database, bookService);
 BookRentalService bookRentalService = new BookRentalService(database);
+MemberService memberService = new MemberService(database,bookRentalService);
 bool isOptionActive = true; 
 bool isOperationActive = true;
+Console.ForegroundColor = ConsoleColor.Blue;
+Console.WriteLine("Welcome to the Library");
+Console.ResetColor();
 while (isOptionActive)
 {
-    Console.WriteLine("Choose the option: ");
-    Console.WriteLine("Genre (genre)\t\tAuthor (author)\t\tBook (book)\t BookRental (bookrental)\tExit Program (exit)");
+    Console.WriteLine();
+    Console.ForegroundColor = ConsoleColor.Gray;
+    Console.WriteLine("Choose the item to operate with: ");
+    Console.ResetColor();
+    Console.WriteLine("---------------------------------------------------------------------------------------------------------------------------------------");
+    Console.WriteLine();
+    Console.ForegroundColor = ConsoleColor.DarkCyan;
+    Console.WriteLine("Genre (genre)\t   Author (author)\t   Book (book)\t   Member (member)\t   RentalRecord (rentalrecord)\t   Exit Program (exit)");
+    Console.WriteLine();
+    Console.ResetColor();
+    Console.WriteLine("---------------------------------------------------------------------------------------------------------------------------------------");
+    Console.WriteLine();
     string? entity = Console.ReadLine();
     if(string.IsNullOrEmpty(entity))
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine("Please choose one option");
+        Console.WriteLine();
+        Console.ResetColor();
         continue;
     }
     if(entity.ToLower() == "exit")
     {
+        Console.ForegroundColor = ConsoleColor.DarkYellow;
+        Console.WriteLine();
+        Console.WriteLine("Program is terminated");
+        Console.WriteLine();
+        Thread.Sleep(3000);
+        Console.ResetColor();
         break;
     }
-    if(entity.ToLower() != "genre" &&  entity.ToLower() != "author" && entity.ToLower() != "book" && entity.ToLower() != "exit" && entity.ToLower() != "bookrental")
+    if(entity.ToLower() != "genre" &&  entity.ToLower() != "author" && entity.ToLower() != "book" && entity.ToLower() != "exit" && entity.ToLower() != "rentalrecord" && entity.ToLower() != "member")
     {
+        Console.WriteLine();
+        Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine("Please do not choose out of these options");
+        Console.WriteLine();
+        Console.ResetColor();
         continue;
     }
+    Console.WriteLine();
     while (isOperationActive)
     {
+        Console.WriteLine("--------------------------------");
+        Console.WriteLine();
+        Console.ForegroundColor = ConsoleColor.Gray;
         Console.WriteLine("Choose the operation: ");
         Console.WriteLine();
+        Console.WriteLine("--------------------------------");
+        Console.WriteLine();
+        Console.WriteLine("--------------------------------");
+        Console.ForegroundColor = ConsoleColor.Cyan;
         ChooseOperation(entity);
+        Console.ResetColor();
+        Console.WriteLine("--------------------------------");
+        Console.ResetColor();
         string? operation = Console.ReadLine();
+        Console.WriteLine("--------------------------------");
         if (string.IsNullOrEmpty(operation))
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Please choose one operation");
+            Console.WriteLine();
+            Console.ResetColor();
             continue;
         }
         if (operation.ToLower() == "exit")
@@ -76,7 +119,7 @@ void ProcessOperation(string entity, string operation)
                         ShowAllGenreByName(genrename);
                         Console.WriteLine("Enter genre id to delete: ");
                         int genreid = int.Parse(Console.ReadLine() ?? string.Empty);
-                        DeleteGenre(genreid, bookService);
+                        DeleteGenre(genreid);
                     }
                     catch (Exception ex)
                     {
@@ -110,7 +153,7 @@ void ProcessOperation(string entity, string operation)
                     break;
             }
             break;
-        case ("author"):
+        case "author":
             switch (operation)
             {
                 case ("create"):
@@ -128,7 +171,7 @@ void ProcessOperation(string entity, string operation)
                     try
                     {
                         int authorid = int.Parse(Console.ReadLine() ?? string.Empty);
-                        DeleteAuthor(authorid, bookService);
+                        DeleteAuthor(authorid);
                     }
                     catch (Exception ex)
                     {
@@ -169,7 +212,7 @@ void ProcessOperation(string entity, string operation)
                     break;
             }
             break;
-        case ("book"):
+        case "book":
             switch (operation)
             {
                 case "create":
@@ -325,6 +368,154 @@ void ProcessOperation(string entity, string operation)
                     break;
             }
             break;
+        case "member":
+            switch (operation)
+            {
+                case "create":
+                    Console.WriteLine("Enter member name: ");
+                    string membername = Console.ReadLine() ?? string.Empty;
+                    Console.WriteLine("Enter member surname: ");
+                    string? membersurname = Console.ReadLine();
+                    Console.WriteLine("Enter member pin: ");
+                    string memberpin = Console.ReadLine() ?? string.Empty;
+                    CreateMember(membername,memberpin,membersurname);
+                    break;
+                case "delete":
+                    try
+                    {
+                        Console.WriteLine("Enter member name to search: ");
+                        membername = Console.ReadLine() ?? string.Empty;
+                        ShowAllMemberByName(membername);
+                        Console.WriteLine("Enter member id to delete: ");
+                        int memberid = int.Parse(Console.ReadLine() ?? string.Empty);
+                        DeleteMember(memberid);
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                    break;
+                case "showall":
+                    ShowAllMember();
+                    break;
+                case "showbyname":
+                    Console.WriteLine("Enter member name to search: ");
+                    membername = Console.ReadLine() ?? string.Empty;
+                    ShowAllMemberByName(membername);
+                    break;
+                case "showbysurname":
+                    Console.WriteLine("Enter member surname to search: ");
+                    membersurname = Console.ReadLine() ?? string.Empty;
+                    ShowAllMemberBySurname(membersurname);
+                    break;
+                case "update":
+                    try
+                    {
+                        Console.WriteLine("Enter member name to search: ");
+                        membername = Console.ReadLine() ?? string.Empty;
+                        ShowAllMemberByName(membername);
+                        Console.WriteLine("Enter member id to update: ");
+                        int memberid = int.Parse(Console.ReadLine() ?? string.Empty);
+                        Console.WriteLine("Enter new member name: ");
+                        membername = Console.ReadLine() ?? string.Empty;
+                        Console.WriteLine("Enter new member surname: ");
+                        membersurname = Console.ReadLine() ?? string.Empty;
+                        UpdateMember(memberid, membername, membersurname);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                    break;
+                case "loan":
+                    if(bookService.GetAll().Count == 0)
+                    {
+                        Console.WriteLine("Creation of book is needed");
+                        entity = "book";
+                        operation = "create";
+                        goto start;
+                    }
+                    if(memberService.GetAll().Count == 0)
+                    {
+                        Console.WriteLine("Creation of member is needed");
+                        goto case "create";
+                    }
+                    try
+                    {
+                        Console.WriteLine("Enter member name to search: ");
+                        membername = Console.ReadLine() ?? string.Empty;
+                        ShowAllMemberByName(membername);
+                        Console.WriteLine("Enter member pin: ");
+                        memberpin = Console.ReadLine() ?? string.Empty;
+                        Console.WriteLine("Enter book title to search: ");
+                        string booktitle = Console.ReadLine() ?? string.Empty;
+                        ShowAllBookByTitle(booktitle);
+                        Console.WriteLine("Enter book id to rent: ");
+                        Guid bookid = Guid.Parse(Console.ReadLine() ?? string.Empty);
+                        Console.WriteLine("Enter borrow date (dd.MM.yyyy): ");
+                        DateTime borrowdate = DateTime.ParseExact(Console.ReadLine() ?? string.Empty, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                        Console.WriteLine("Enter return date (dd.MM.yyyy): ");
+                        DateTime returndate = DateTime.ParseExact(Console.ReadLine() ?? string.Empty, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                        LoanBook(memberpin,bookid,borrowdate,returndate);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                    break;
+                case "return":
+                    if(bookRentalService.GetAll().Count == 0)
+                    {
+                        Console.WriteLine("There is no book rental record");
+                        break;
+                    }
+                    try
+                    {
+                        Console.WriteLine("Enter member name to search: ");
+                        membername = Console.ReadLine() ?? string.Empty;
+                        ShowAllMemberByName(membername);
+                        Console.WriteLine("Enter member pin: ");
+                        memberpin = Console.ReadLine() ?? string.Empty;
+                        ReturnBook(memberpin);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                    break;
+            }
+            break;
+        case "rentalrecord":
+            switch (operation)
+            {
+                case "update":
+                    ShowAllRentalRecord();
+                    Console.WriteLine("Enter rental record id: ");
+                    int id = int.Parse(Console.ReadLine() ?? string.Empty);
+                    Console.WriteLine("Enter member name to search: ");
+                    string membername = Console.ReadLine() ?? string.Empty;
+                    ShowAllMemberByName(membername);
+                    Console.WriteLine("Enter new member id: ");
+                    int memberid = int.Parse(Console.ReadLine() ?? string.Empty);
+                    Console.WriteLine("Enter book title to search: ");
+                    string title = Console.ReadLine() ?? string.Empty;
+                    ShowAllBookByTitle(title);
+                    Console.WriteLine("Enter new book id: ");
+                    Guid bookid = Guid.Parse(Console.ReadLine() ?? string.Empty);
+                    Console.WriteLine("Enter new borrow date (dd.MM.yyyy): ");
+                    DateTime borrowdate = DateTime.ParseExact(Console.ReadLine() ?? string.Empty, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                    Console.WriteLine("Enter new return date (dd.MM.yyyy): ");
+                    DateTime returndate = DateTime.ParseExact(Console.ReadLine() ?? string.Empty, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                    UpdateRentalRecord(id, memberid, bookid, borrowdate, returndate);
+                    break;
+                case "showall":
+                    ShowAllRentalRecord();
+                    break;
+                case "showexpired":
+                    ShowAllExpiredRentalRecord();
+                    break;
+            }
+            break;
     }
 }
 
@@ -336,21 +527,50 @@ bool ValidateOperation(string entity, string operation)
         case "genre":
             if (operation != "create" && operation != "update" && operation != "delete" && operation != "showall" && operation != "showbyname")
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Please do not choose out of these operations");
+                Console.WriteLine();
+                Console.ResetColor();
                 Iscorrect = false;
             }
             break;
         case "author":
             if (operation != "create" && operation != "update" && operation != "delete" && operation != "showall" && operation != "showbyname" && operation != "showbysurname")
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Please do not choose out of these operations");
+                Console.WriteLine();
+                Console.ResetColor();
                 Iscorrect = false;
             }
             break;
         case "book":
             if (operation != "create" && operation != "update" && operation != "delete" && operation != "showall" && operation != "showbytitle" && operation != "showbydate" && operation != "showbygenre" && operation != "showbyauthor")
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Please do not choose out of these operations");
+                Console.WriteLine();
+                Console.ResetColor();
+                Iscorrect = false;
+            }
+            break;
+        case "member":
+            if (operation != "create" && operation != "update" && operation != "delete" && operation != "showall" && operation != "showbyname" && operation != "showbysurname" && operation != "loan" && operation != "return")
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Please do not choose out of these operations");
+                Console.WriteLine();
+                Console.ResetColor();
+                Iscorrect = false;
+            }
+            break;
+        case "rentalrecord":
+            if (operation != "update" && operation != "showall" && operation != "showexpired")
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Please do not choose out of these operations");
+                Console.WriteLine();
+                Console.ResetColor();
                 Iscorrect = false;
             }
             break;
@@ -360,6 +580,7 @@ bool ValidateOperation(string entity, string operation)
 
 void ChooseOperation(string entity)
 {
+    Console.WriteLine();
     switch (entity.ToLower())
     {
         case "genre":
@@ -390,7 +611,25 @@ void ChooseOperation(string entity)
             Console.WriteLine("Show books by genre (showbygenre)");
             Console.WriteLine("Exit (exit)");
             break;
-    }
+        case "member":
+            Console.WriteLine("Create member (create)");
+            Console.WriteLine("Update member (update)");
+            Console.WriteLine("Delete member (delete)");
+            Console.WriteLine("Show members (showall)");
+            Console.WriteLine("Show members by name (showbyname)");
+            Console.WriteLine("Show members by surname (showbysurname)");
+            Console.WriteLine("Loan book (loan)");
+            Console.WriteLine("Return book (return)");
+            Console.WriteLine("Exit (exit)");
+            break;
+        case "rentalrecord":
+            Console.WriteLine("Update rental record (update)");
+            Console.WriteLine("Show rentall records (showall)");
+            Console.WriteLine("Show expired rentall records (showexpired)");
+            Console.WriteLine("Exit (exit)");
+            break;
+        }
+    Console.WriteLine();
 }
 
 #region Genre
@@ -399,24 +638,32 @@ void CreateGenre(string name)
     try
     {
         genreService.Create(name);
+        Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine($"{name} genre is created successfully");
+        Console.ResetColor();
     } 
     catch(Exception ex) 
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
     }
 }
 
-void DeleteGenre(int id, BookService bookService)
+void DeleteGenre(int id)
 {
     try
     {
-        genreService.Delete(id, bookService);
-        Console.WriteLine("Genre is deleted");
+        genreService.Delete(id);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"Genre with {id} Id is successfully deleted");
+        Console.ResetColor();
     }
     catch(Exception ex )
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
     }
 }
 
@@ -442,6 +689,7 @@ void ShowAllGenreByName(string name)
     }
     catch (Exception ex)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
     }
 }
@@ -450,7 +698,7 @@ void UpdateGenre(int id, string name)
     try
     {
         genreService.Update(id, name);
-        Console.WriteLine("Genre is updated");
+        Console.WriteLine($"Genre with {id} Id is updated");
     }
     catch (Exception ex)
     {
@@ -464,23 +712,31 @@ void CreateAuthor(string name, string? surname)
     try
     {
         authorService.Create(name,surname);
-        Console.WriteLine($"Author {name} {surname} is created");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"Author {name} {surname} is successfully created");
+        Console.ResetColor();
     }
     catch (Exception ex)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
     }
 }
-void DeleteAuthor(int id, BookService bookService)
+void DeleteAuthor(int id)
 {
     try
     {
-        authorService.Delete(id, bookService);
-        Console.WriteLine("Author is deleted");
+        authorService.Delete(id);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"Author with {id} Id is  successfully deleted");
+        Console.ResetColor();
     }
     catch( Exception ex )
     {
+       Console.ForegroundColor = ConsoleColor.Red;
        Console.WriteLine(ex.Message);
+       Console.ResetColor();
     }
 
 }
@@ -506,7 +762,9 @@ void ShowAllAuthorByName(string name)
     }
     catch (Exception ex)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
     }
 }
 void ShowAllAuthorBySurname(string? surname)
@@ -522,7 +780,9 @@ void ShowAllAuthorBySurname(string? surname)
     }
     catch (Exception ex)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
     }
 }
 void UpdateAuthor(int id, string name, string? surname)
@@ -530,11 +790,15 @@ void UpdateAuthor(int id, string name, string? surname)
     try
     {
         authorService.Update(id, name, surname);
-        Console.WriteLine("Author is updated");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"Author with {id} Id is successfully updated");
+        Console.ResetColor();
     }
     catch(Exception ex)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
     }
 }
 #endregion
@@ -544,11 +808,15 @@ void CreateBook(string title, int count, DateTime publicationdate, List<Genre> g
     try
     {
         bookService.Create(title, count, publicationdate, genres, authors);
-        Console.WriteLine($"{title} book is created");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"{title} book is successfully created");
+        Console.ResetColor();
     }
     catch (Exception ex)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
     }
 }
 void DeleteBook(Guid id)
@@ -556,11 +824,15 @@ void DeleteBook(Guid id)
     try
     {
         bookService.Delete(id);
-        Console.WriteLine("Book is deleted");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"Book with {id} Id is deleted");
+        Console.ResetColor();
     }
     catch (Exception ex)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
     }
 }
 void ShowAllBook()
@@ -585,7 +857,9 @@ void ShowAllBookByTitle(string title)
     }
     catch (Exception ex)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
     }
 }
 void ShowAllBookByPublicationDate(DateTime publicationdate)
@@ -601,7 +875,9 @@ void ShowAllBookByPublicationDate(DateTime publicationdate)
     }
     catch (Exception ex)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
     }
 }
 void ShowAllBookByAuthor(Author author)
@@ -617,7 +893,9 @@ void ShowAllBookByAuthor(Author author)
     }
     catch (Exception ex)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
     }
 }
 
@@ -634,7 +912,9 @@ void ShowAllBookByGenre(Genre genre)
     }
     catch (Exception ex)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
     }
 }
 void UpdateBook(Guid id, string title, int count, DateTime publicationdate, List<Genre> genres, List<Author> authors)
@@ -642,11 +922,178 @@ void UpdateBook(Guid id, string title, int count, DateTime publicationdate, List
     try
     {
         bookService.Update(id, title, count, publicationdate, genres, authors);
-        Console.WriteLine("Book is updated");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"Book with {id} Id is updated");
+        Console.ResetColor();
     }
     catch (Exception ex)
     {
+        Console.ForegroundColor = ConsoleColor.Red;
         Console.WriteLine(ex.Message);
+        Console.ResetColor();
+    }
+}
+#endregion
+#region Member
+void CreateMember(string name, string pin, string? surname = null)
+{
+    try
+    {
+        memberService.Create(name, pin, surname);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"Member {name} {surname} is created successfully");
+        Console.ResetColor();
+    }
+    catch(Exception ex)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(ex.Message);
+        Console.ResetColor();
+    }
+}
+void DeleteMember(int id)
+{
+    try
+    {
+        memberService.Delete(id);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"Member with {id} Id is successfully deleted");
+        Console.ResetColor();
+    }
+    catch (Exception ex)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(ex.Message);
+        Console.ResetColor();
+    }
+}
+void UpdateMember(int id, string name, string? surname = null)
+{
+    try
+    {
+        memberService.Update(id, name, surname);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"Member with {id} Id is successfully updated");
+        Console.ResetColor();
+    }
+    catch(Exception ex)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(ex.Message);
+        Console.ResetColor();
+    }
+}
+void ShowAllMember()
+{
+    var members = memberService.GetAll();
+    Console.WriteLine("Members");
+    foreach (var member in members)
+    {
+        Console.WriteLine(member);
+    }
+}
+void ShowAllMemberByName(string name)
+{
+    try
+    {
+        var members = memberService.SearchByName(name);
+        Console.WriteLine("Members");
+        foreach(var member in members)
+        {
+            Console.WriteLine(member);
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(ex.Message);
+        Console.ResetColor();
+    }
+}
+void ShowAllMemberBySurname(string? surname)
+{
+    try
+    {
+        var members = memberService.SearchBySurname(surname);
+        Console.WriteLine("Members");
+        foreach( var member in members)
+        {
+            Console.WriteLine(member);
+        }
+    }
+    catch(Exception ex)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(ex.Message);
+        Console.ResetColor();
+    }
+}
+void LoanBook(string pin, Guid bookid, DateTime borrowdate, DateTime returndate)
+{
+    try
+    {
+        memberService.LoanBook(pin, bookid, borrowdate, returndate);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("The book is successfully rented");
+        Console.ResetColor();
+    }
+    catch(Exception ex)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(ex.Message);
+        Console.ResetColor();
+    }
+}
+void ReturnBook(string pin)
+{
+    try
+    {
+        memberService.ReturnBook(pin);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("The book is returned successfully");
+        Console.ResetColor();
+    }
+    catch(Exception ex)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(ex.Message);
+        Console.ResetColor();
+    }
+}
+#endregion
+#region BookRental
+void UpdateRentalRecord(int id, int memberid, Guid bookid, DateTime borrowdate, DateTime returndate)
+{
+    try
+    {
+        bookRentalService.Update(id, memberid, bookid, borrowdate, returndate);
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"Rental record with {id} Id is updated");
+        Console.ResetColor();
+    }
+    catch (Exception ex)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(ex.Message);
+        Console.ResetColor();
+    }
+}
+void ShowAllRentalRecord()
+{
+    var rentalrecords = bookRentalService.GetAll();
+    Console.WriteLine("Rental Records");
+    foreach(var record in rentalrecords)
+    {
+        Console.WriteLine(record);  
+    }
+}
+void ShowAllExpiredRentalRecord()
+{
+    var rentalrecords = bookRentalService.ExpiredGetAll();
+    Console.WriteLine("Expired Rental Records");
+    foreach (var record in rentalrecords)
+    {
+        Console.WriteLine(record);
     }
 }
 #endregion

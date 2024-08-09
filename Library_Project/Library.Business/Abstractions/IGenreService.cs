@@ -12,7 +12,7 @@ namespace Library.Business.Abstractions
     {
         void Create(string name);
         void Update(int id, string name);
-        void Delete(int id, BookService bookservice);
+        void Delete(int id);
         List<Genre> GetAll();
         Genre GetById(int id);
         List<Genre> SearchByName(string name);

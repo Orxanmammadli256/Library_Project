@@ -90,7 +90,7 @@ namespace Library.Business.Implementations
             {
                 throw new ArgumentNullException("Title should not be null");
             }
-            var books = _database.books.FindAll(b => b.Title == title);
+            var books = _database.books.FindAll(b => b.Title.ToLower().Contains(title.ToLower()));
             return books;
         }
 

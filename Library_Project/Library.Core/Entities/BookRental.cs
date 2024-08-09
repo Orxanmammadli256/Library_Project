@@ -10,18 +10,22 @@ namespace Library.Core.Entities
     public class BookRental : IEntity<int>
     {
         public int Id { get; set; }
-        public string bookTitle { get; set; }
-        public Guid bookId { get; set; }
+        public Member Member { get; set; }
+        public Book Book { get; set; }
         public DateTime borrowDate { get; set; }
         public DateTime returnDate { get; set; }
         private static int _id;
-        public BookRental(Guid bookid, string booktitle, DateTime borrowdate, DateTime returndate)
+        public BookRental(Member member, Book book, DateTime borrowdate, DateTime returndate)
         {
-            bookId = bookid;
-            bookTitle = booktitle;
+            Book = book;
+            Member = member;
             borrowDate = borrowdate;
             returnDate = returndate;
             Id = ++_id;
+        }
+        public override string ToString()
+        {
+            return $"Id: {Id}\tMemberName: {Member.Name}\tMemberSurname: {Member.Surname}\tBookTitle: {Book.Title}\t  BorrowDate: {borrowDate.ToString("dd.MM.yyyy")}\tReturnDate: {returnDate.ToString("dd.MM.yyyy")}";
         }
     }
 }

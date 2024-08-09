@@ -29,7 +29,7 @@ namespace Library.Core.Entities
         }
         public override string ToString()
         {
-            return $"Id: {Id}\tTitle: {Title}\tCount: {totalCount}\tPublicationDate: {publicationDate.ToString("dd.MM.yyyy")}\tGenreName: {string.Join(" ",Genres.Select(g => g.Name))}\tAuthorName: {string.Join(" ",Authors.Select(a => a.Name + " " + a.Surname))}";
+            return $"Id: {Id}\tTitle: {Title}\tCount: {totalCount}\tPublicationDate: {publicationDate.ToString("dd.MM.yyyy")}\tGenreName: {string.Join(",",Genres.Select(g => g.Name))}\tAuthorName: {string.Join(",",Authors.Select(a => a.Name + " " + a.Surname))}";
         }
 
     }
