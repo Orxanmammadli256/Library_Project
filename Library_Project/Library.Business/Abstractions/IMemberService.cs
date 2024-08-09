@@ -17,7 +17,7 @@ namespace Library.Business.Abstractions
         Member GetById(int id);
         List<Member> SearchByName(string name);
         List<Member> SearchBySurname(string? surname);
-        void LoanBook(string pin, Guid bookid, DateTime borrowDate, DateTime returnDate);
+        void LoanBook(string pin, Guid bookid, DateTime returnDate);
         void ReturnBook(string pin);
     }
 }

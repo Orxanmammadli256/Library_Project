@@ -66,19 +66,11 @@ namespace Library.Business.Implementations
             }
             return member;
         }
-        public void LoanBook(string pin, Guid bookid, DateTime borrowdate, DateTime returndate)
+        public void LoanBook(string pin, Guid bookid, DateTime returndate)
         {
-            if (borrowdate > DateTime.Now) // ask this one
-            {
-                throw new FutureDateException("Borrow date should not be in the future");
-            }
             if (returndate < DateTime.Now)
             {
                 throw new PastDateException("Return date should not be in the past");
-            }
-            if (borrowdate > returndate)
-            {
-                throw new InConsistentDateIntervalException("Return date should not be ealier than borrow date");
             }
             var book = _database.books.Find(b => b.Id == bookid);
             if (book is null)
@@ -100,7 +92,7 @@ namespace Library.Business.Implementations
             }
             book.availableCount--;
             member.bookRented = true;
-            _bookrentalservice.Create(member,book,borrowdate,returndate);
+            _bookrentalservice.Create(member,book,returndate);
         }
 
 

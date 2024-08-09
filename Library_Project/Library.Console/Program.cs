@@ -452,11 +452,9 @@ void ProcessOperation(string entity, string operation)
                         ShowAllBookByTitle(booktitle);
                         Console.WriteLine("Enter book id to rent: ");
                         Guid bookid = Guid.Parse(Console.ReadLine() ?? string.Empty);
-                        Console.WriteLine("Enter borrow date (dd.MM.yyyy): ");
-                        DateTime borrowdate = DateTime.ParseExact(Console.ReadLine() ?? string.Empty, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
                         Console.WriteLine("Enter return date (dd.MM.yyyy): ");
                         DateTime returndate = DateTime.ParseExact(Console.ReadLine() ?? string.Empty, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
-                        LoanBook(memberpin,bookid,borrowdate,returndate);
+                        LoanBook(memberpin,bookid,returndate);
                     }
                     catch (Exception ex)
                     {
@@ -491,22 +489,29 @@ void ProcessOperation(string entity, string operation)
                 case "update":
                     ShowAllRentalRecord();
                     Console.WriteLine("Enter rental record id: ");
-                    int id = int.Parse(Console.ReadLine() ?? string.Empty);
-                    Console.WriteLine("Enter member name to search: ");
-                    string membername = Console.ReadLine() ?? string.Empty;
-                    ShowAllMemberByName(membername);
-                    Console.WriteLine("Enter new member id: ");
-                    int memberid = int.Parse(Console.ReadLine() ?? string.Empty);
-                    Console.WriteLine("Enter book title to search: ");
-                    string title = Console.ReadLine() ?? string.Empty;
-                    ShowAllBookByTitle(title);
-                    Console.WriteLine("Enter new book id: ");
-                    Guid bookid = Guid.Parse(Console.ReadLine() ?? string.Empty);
-                    Console.WriteLine("Enter new borrow date (dd.MM.yyyy): ");
-                    DateTime borrowdate = DateTime.ParseExact(Console.ReadLine() ?? string.Empty, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
-                    Console.WriteLine("Enter new return date (dd.MM.yyyy): ");
-                    DateTime returndate = DateTime.ParseExact(Console.ReadLine() ?? string.Empty, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
-                    UpdateRentalRecord(id, memberid, bookid, borrowdate, returndate);
+                    try
+                    {
+                        int id = int.Parse(Console.ReadLine() ?? string.Empty);
+                        Console.WriteLine("Enter member name to search: ");
+                        string membername = Console.ReadLine() ?? string.Empty;
+                        ShowAllMemberByName(membername);
+                        Console.WriteLine("Enter new member id: ");
+                        int memberid = int.Parse(Console.ReadLine() ?? string.Empty);
+                        Console.WriteLine("Enter book title to search: ");
+                        string title = Console.ReadLine() ?? string.Empty;
+                        ShowAllBookByTitle(title);
+                        Console.WriteLine("Enter new book id: ");
+                        Guid bookid = Guid.Parse(Console.ReadLine() ?? string.Empty);
+                        Console.WriteLine("Enter new borrow date (dd.MM.yyyy): ");
+                        DateTime borrowdate = DateTime.ParseExact(Console.ReadLine() ?? string.Empty, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                        Console.WriteLine("Enter new return date (dd.MM.yyyy): ");
+                        DateTime returndate = DateTime.ParseExact(Console.ReadLine() ?? string.Empty, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None);
+                        UpdateRentalRecord(id, memberid, bookid, borrowdate, returndate);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
                     break;
                 case "showall":
                     ShowAllRentalRecord();
@@ -1028,11 +1033,11 @@ void ShowAllMemberBySurname(string? surname)
         Console.ResetColor();
     }
 }
-void LoanBook(string pin, Guid bookid, DateTime borrowdate, DateTime returndate)
+void LoanBook(string pin, Guid bookid, DateTime returndate)
 {
     try
     {
-        memberService.LoanBook(pin, bookid, borrowdate, returndate);
+        memberService.LoanBook(pin, bookid, returndate);
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("The book is successfully rented");
         Console.ResetColor();

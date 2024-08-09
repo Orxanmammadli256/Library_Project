@@ -18,9 +18,9 @@ namespace Library.Business.Implementations
         {
             _database = database;
         }
-        public void Create(Member member, Book book, DateTime borrowdate, DateTime returndate)
+        public void Create(Member member, Book book, DateTime returndate)
         {
-            BookRental bookRental = new BookRental(member,book,borrowdate,returndate);
+            BookRental bookRental = new BookRental(member,book,DateTime.Now,returndate);
             _database.bookRentals.Add(bookRental);
         }
 
@@ -47,9 +47,13 @@ namespace Library.Business.Implementations
 
         public void Update(int id, int memberid, Guid bookid, DateTime borrowdate, DateTime returndate)
         {
-            if (borrowdate > DateTime.Now || returndate > DateTime.Now)
+            if (borrowdate > DateTime.Now)
             {
                 throw new FutureDateException("Date should not be in the future");
+            }
+            if(returndate < DateTime.Now)
+            {
+                throw new PastDateException("Return date should not be in the past");
             }
             if (borrowdate > returndate)
             {

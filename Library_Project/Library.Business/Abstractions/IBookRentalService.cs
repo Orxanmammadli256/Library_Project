@@ -9,7 +9,7 @@ namespace Library.Business.Abstractions
 {
     public interface IBookRentalService
     {
-        void Create(Member member, Book book, DateTime borrowdate, DateTime returndate);
+        void Create(Member member, Book book, DateTime returndate);
         void Delete(int memberid, Guid bookid);
         void Update(int id, int memberid, Guid bookid, DateTime borrowdate, DateTime returndate);
         List<BookRental> GetAll();
