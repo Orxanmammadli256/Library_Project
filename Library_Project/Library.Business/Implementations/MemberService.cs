@@ -104,7 +104,7 @@ namespace Library.Business.Implementations
             }
             if (pin.Count() != 7)
             {
-                throw new InvalidPinException("Pin count should be 7"); // ask this one
+                throw new InvalidPinException("Pin count should be 7"); 
             }
             var member = _database.members.Find(m => m.Pin == pin);
             if (member is null)

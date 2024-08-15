@@ -44,6 +44,10 @@ namespace Library.Business.Implementations
             {
                 throw new NotFoundException("This book does not exist");
             }
+            if(book.totalCount != book.availableCount)
+            {
+                throw new BookRentalExistException("This book is rented");
+            }
             _database.books.Remove(book);
         }
 
@@ -112,6 +116,10 @@ namespace Library.Business.Implementations
             if (book is null)
             {
                 throw new NotFoundException("This book does not exist");
+            }
+            if(book.totalCount - book.availableCount > count || book.availableCount > count) 
+            {
+                throw new InconsistentCountException("Consider that rented book exist");
             }
             book.Title = title;
             book.totalCount = count;
