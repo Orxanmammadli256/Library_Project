@@ -14,7 +14,7 @@ MemberService memberService = new MemberService(database,bookRentalService);
 bool isOptionActive = true; 
 bool isOperationActive = true;
 Console.ForegroundColor = ConsoleColor.Blue;
-Console.WriteLine("Welcome to the Library");
+Console.WriteLine("Welcome to  Library");
 Console.ResetColor();
 while (isOptionActive)
 {
